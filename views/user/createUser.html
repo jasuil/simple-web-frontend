@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>사용자를 생성하세요</title>
+
+</head>
+<body>
+    <input type="text" id="email" value="email">
+    <input type="password" id="password"  value="password">
+    <button id="submit">전송</button>
+    <script>
+		document.getElementById("submit").addEventListener("click", submitToServer);
+		
+		function setCookie(cookie_name, value, days) {
+		  var exdate = new Date();
+		  exdate.setDate(exdate.getDate() + days);
+		  // 설정 일수만큼 현재시간에 만료값으로 지정
+
+		  var cookie_value = escape(value) + ((days == null) ? '' : '; expires=' + exdate.toUTCString());
+		  document.cookie = cookie_name + '=' + cookie_value;
+		}
+		
+		function getCookie(name) {
+			var value = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+			return value? value[2] : null;
+		};
+
+		
+		function submitToServer() {
+		
+			httpRequest = new XMLHttpRequest();
+			setCookie('user_email', document.getElementById("email").value, '1');
+			setCookie('user_password', document.getElementById("password").value, '1');
+			
+			if(!httpRequest) {
+			  alert('XMLHTTP 인스턴스를 만들 수가 없어요 ㅠㅠ');
+			  return false;
+			}
+			httpRequest.onreadystatechange = alertContents;
+			httpRequest.open('GET', 'http://localhost:8080/today');
+			httpRequest.withCredentials = true;
+			//httpRequest.setDisableHeaderCheck = true;
+			//httpRequest.setRequestHeader("Access-Control-Allow-Origin", "localhost:3000")
+			httpRequest.setRequestHeader("user-email", getCookie("user_email"))
+			httpRequest.setRequestHeader("user-password", getCookie("user_password"))
+			httpRequest.setRequestHeader('Content-type', 'jasuil');
+			
+			console.log(getCookie("user_email"));
+			httpRequest.send();
+		  }
+
+		  function alertContents() {
+			if (httpRequest.readyState === XMLHttpRequest.DONE) {
+			  if (httpRequest.status === 200) {
+				alert(httpRequest.responseText);
+			  } else {
+				alert('request에 뭔가 문제가 있어요.');
+				location.href="/user/new";
+			  }
+			}
+		}
+    </script>
+</body>
+</html>
